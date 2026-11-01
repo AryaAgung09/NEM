@@ -192,13 +192,14 @@ export function SiteShell({ children }: SiteShellProps) {
                   className="business-nav-item"
                   key={key}
                   onMouseEnter={openBusiness}
+                  onMouseLeave={scheduleClose}
                 >
-                  <button
+                  <Link
                     aria-expanded={businessOpen}
                     className="nav-link nav-link--button"
-                    onClick={() => setBusinessOpen((open) => !open)}
-                    onFocus={() => setBusinessOpen(true)}
-                    type="button"
+                    href="/bisnis-kami"
+                    onMouseEnter={openBusiness}
+                    onFocus={openBusiness}
                   >
                     {copy.navigation.business}
                     <ChevronDown
@@ -206,7 +207,7 @@ export function SiteShell({ children }: SiteShellProps) {
                       className={businessOpen ? "is-rotated" : ""}
                       size={15}
                     />
-                  </button>
+                  </Link>
                   <AnimatePresence>
                     {businessOpen && (
                       <motion.div
@@ -216,6 +217,7 @@ export function SiteShell({ children }: SiteShellProps) {
                         initial={{ opacity: 0, y: -8 }}
                         transition={{ duration: reducedMotion ? 0 : 0.2 }}
                         onMouseEnter={clearCloseTimer}
+                        onMouseLeave={scheduleClose}
                       >
                         <div className="mega-menu__image">
                           <Image
@@ -250,13 +252,14 @@ export function SiteShell({ children }: SiteShellProps) {
                   className="about-nav-item"
                   key={key}
                   onMouseEnter={openAbout}
+                  onMouseLeave={scheduleClose}
                 >
-                  <button
+                  <Link
                     aria-expanded={aboutOpen}
                     className="nav-link nav-link--button"
-                    onClick={() => setAboutOpen((open) => !open)}
-                    onFocus={() => setAboutOpen(true)}
-                    type="button"
+                    href="/"
+                    onMouseEnter={openAbout}
+                    onFocus={openAbout}
                   >
                     {copy.navigation.about}
                     <ChevronDown
@@ -264,7 +267,7 @@ export function SiteShell({ children }: SiteShellProps) {
                       className={aboutOpen ? "is-rotated" : ""}
                       size={15}
                     />
-                  </button>
+                  </Link>
                   <AnimatePresence>
                     {aboutOpen && (
                       <motion.div
@@ -274,6 +277,7 @@ export function SiteShell({ children }: SiteShellProps) {
                         initial={{ opacity: 0, y: -8 }}
                         transition={{ duration: reducedMotion ? 0 : 0.2 }}
                         onMouseEnter={clearCloseTimer}
+                        onMouseLeave={scheduleClose}
                       >
                         <div className="mega-menu__image">
                           <Image
