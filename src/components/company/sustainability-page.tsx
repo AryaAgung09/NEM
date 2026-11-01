@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Leaf, Shield, Users, TrendingUp, Sun, Droplet, Trees, UserCheck, Award, ChevronRight } from "lucide-react";
-import { HorizontalScroll, Reveal, Counter, PinnedStory } from "@/components/motion";
+import { Leaf, Shield, Users, TrendingUp, Sun, Droplet, Trees, UserCheck, Award, ChevronRight, Zap, Recycle, Globe, HandHeart, BookOpen, Gavel, ArrowUpRight, Target, Sparkles, ExternalLink, ChevronLeft } from "lucide-react";
+import { HorizontalScroll, Reveal, Counter } from "@/components/motion";
 import { useLocale } from "@/components/locale-provider";
 import { investorSustainabilityData } from "@/data/investor-sustainability";
 import { PageHero } from "./page-hero";
+import { useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState, useCallback } from "react";
 import styles from "./company.module.css";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -20,15 +22,24 @@ const iconMap: Record<string, React.ReactNode> = {
   "trending-up": <TrendingUp aria-hidden="true" size={24} />,
 };
 
+const programIcons: Record<string, React.ReactNode> = {
+  decarbon: <Zap aria-hidden="true" size={28} />,
+  circular: <Recycle aria-hidden="true" size={28} />,
+  biodiversity: <Globe aria-hidden="true" size={28} />,
+  community: <HandHeart aria-hidden="true" size={28} />,
+  education: <BookOpen aria-hidden="true" size={28} />,
+  governance: <Gavel aria-hidden="true" size={28} />,
+};
+
 const pillarLabels = {
   id: { E: "Lingkungan", S: "Sosial", G: "Tata Kelola" },
   en: { E: "Environment", S: "Social", G: "Governance" },
 };
 
 const pillarColors = {
-  E: { bg: "rgb(34 197 94 / 15%)", text: "#16a34a", border: "rgb(34 197 94 / 30%)" },
-  S: { bg: "rgb(59 130 246 / 15%)", text: "#3b82f6", border: "rgb(59 130 246 / 30%)" },
-  G: { bg: "rgb(168 85 247 / 15%)", text: "#a855f7", border: "rgb(168 85 247 / 30%)" },
+  E: { bg: "rgb(34 197 94 / 15%)", text: "#16a34a", border: "rgb(34 197 94 / 30%)", gradient: "linear-gradient(135deg, rgb(34 197 94 / 20%), rgb(34 197 94 / 5%))" },
+  S: { bg: "rgb(59 130 246 / 15%)", text: "#3b82f6", border: "rgb(59 130 246 / 30%)", gradient: "linear-gradient(135deg, rgb(59 130 246 / 20%), rgb(59 130 246 / 5%))" },
+  G: { bg: "rgb(168 85 247 / 15%)", text: "#a855f7", border: "rgb(168 85 247 / 30%)", gradient: "linear-gradient(135deg, rgb(168 85 247 / 20%), rgb(168 85 247 / 5%))" },
 };
 
 const statusLabels = {
@@ -64,6 +75,126 @@ export function SustainabilityPage() {
   const copy = investorSustainabilityData[locale].sustainability;
   const labels = pillarLabels[locale];
   const sLabels = statusLabels[locale];
+  const reducedMotion = useReducedMotion();
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  
+  // Peek Carousel State
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [translateX, setTranslateX] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ x: number; translateX: number } | null>(null);
+  
+  const cardWidth = 400; // Card width + gap
+  const totalCards = copy.programs.length;
+  
+  // Calculate translateX based on currentIndex
+  useEffect(() => {
+    const containerWidth = 1200; // Approximate container width
+    const centerOffset = (containerWidth - cardWidth) / 2;
+    setTranslateX(centerOffset - currentIndex * cardWidth);
+  }, [currentIndex]);
+  
+  const getAdjacentIndex = (index: number, direction: number) => {
+    const newIndex = index + direction;
+    if (newIndex < 0) return totalCards - 1;
+    if (newIndex >= totalCards) return 0;
+    return newIndex;
+  };
+  
+  const goToPrev = () => {
+    setCurrentIndex(prev => getAdjacentIndex(prev, -1));
+  };
+  
+  const goToNext = () => {
+    setCurrentIndex(prev => getAdjacentIndex(prev, 1));
+  };
+  
+  const goToPage = (index: number) => {
+    setCurrentIndex(index);
+  };
+  
+  // Auto-advance carousel
+  useEffect(() => {
+    if (reducedMotion || isHovered || isDragging) return;
+    const interval = setInterval(() => {
+      goToNext();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [reducedMotion, isHovered, isDragging]);
+  
+  // Drag handlers
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (reducedMotion) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, translateX };
+    e.preventDefault();
+  };
+  
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (reducedMotion) return;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.touches[0].clientX, translateX };
+  };
+  
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || !dragStartRef.current) return;
+    const deltaX = e.clientX - dragStartRef.current.x;
+    setTranslateX(dragStartRef.current.translateX + deltaX);
+  }, [isDragging]);
+  
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDragging || !dragStartRef.current) return;
+    const deltaX = e.touches[0].clientX - dragStartRef.current.x;
+    setTranslateX(dragStartRef.current.translateX + deltaX);
+  }, [isDragging]);
+  
+  const handleMouseUp = () => {
+    if (!isDragging || !dragStartRef.current) return;
+    const deltaX = dragStartRef.current.translateX - translateX;
+    const threshold = cardWidth * 0.25;
+    
+    if (deltaX > threshold) {
+      goToPrev();
+    } else if (deltaX < -threshold) {
+      goToNext();
+    } else {
+      // Snap back to current
+      const containerWidth = 1200;
+      const centerOffset = (containerWidth - cardWidth) / 2;
+      setTranslateX(centerOffset - currentIndex * cardWidth);
+    }
+    
+    setIsDragging(false);
+    dragStartRef.current = null;
+  };
+  
+  // Attach move listeners when dragging
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [isDragging, handleMouseMove, handleTouchMove]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      const progress = Math.max(0, Math.min(1, 1 - rect.bottom / (rect.height + windowHeight)));
+      setScrollProgress(progress);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <main>
@@ -180,56 +311,153 @@ export function SustainabilityPage() {
         </HorizontalScroll>
       </section>
 
-      <section aria-labelledby="programs-heading" className={styles.programs}>
-        <div className={styles.sectionHeading}>
-          <p className={styles.eyebrow}>{copy.programsEyebrow}</p>
-          <h2 id="programs-heading">{copy.programsTitle}</h2>
+      <section aria-labelledby="programs-heading" className={styles.programs} ref={sectionRef}>
+        <div className={styles.sectionHeadingWrapper}>
+          <div className={styles.sectionHeading}>
+            <p className={styles.eyebrow}>{copy.programsEyebrow}</p>
+            <h2 id="programs-heading">{copy.programsTitle}</h2>
+          </div>
+          <p className={styles.sectionSubtext}>
+            {locale === "id" 
+              ? "Inisiatif terintegrasi yang menghubungkan nilai di seluruh rantai bisnis kami." 
+              : "Integrated initiatives connecting value across our entire business value chain."}
+          </p>
         </div>
-        <PinnedStory className={styles.pinnedPrograms}>
-          <div className={styles.programsTrack}>
-            {copy.programs.map((program, index) => {
-              const colors = pillarColors[program.pillar];
-              return (
-                <Reveal className={styles.programCard} delay={index * 0.08} key={program.id}>
-                  <div style={{ "--pillar-color": colors.text, "--pillar-bg": colors.bg, "--pillar-border": colors.border } as React.CSSProperties}>
-                    <div className={styles.programImage}>
-                      <Image
-                        alt={program.image.alt}
-                        fill
-                        sizes="(max-width: 1000px) 100vw, 50vw"
-                        src={program.image.src}
-                      />
-                      <span className={styles.programPillar} style={{ backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }}>
-                        {labels[program.pillar]}
-                      </span>
-                    </div>
-                    <div className={styles.programContent}>
-                      <div className={styles.programMeta}>
-                        <span>{program.region}</span>
+
+        {/* Peek Carousel */}
+        <div 
+          className={styles.peekCarousel}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Track Container */}
+          <div className={styles.peekTrackContainer}>
+            <div 
+              className={styles.peekTrack}
+              ref={trackRef}
+              style={{ transform: `translateX(${translateX}px)` }}
+              onMouseDown={handleMouseDown}
+              onTouchStart={handleTouchStart}
+              onMouseLeave={handleMouseUp}
+              onMouseUp={handleMouseUp}
+              onTouchEnd={handleMouseUp}
+            >
+              {copy.programs.map((program, index) => {
+                const colors = pillarColors[program.pillar];
+                const ProgramIcon = programIcons[program.id] || <Award aria-hidden="true" size={28} />;
+                const isActive = index === currentIndex;
+                const isAdjacent = index === getAdjacentIndex(currentIndex, -1) || index === getAdjacentIndex(currentIndex, 1);
+                
+                return (
+                  <div 
+                    key={program.id}
+                    className={`${styles.peekCard} ${isActive ? styles.peekCardActive : ''} ${isAdjacent ? styles.peekCardPeek : ''}`}
+                    style={{ '--pillar-color': colors.text, '--pillar-gradient': colors.gradient } as React.CSSProperties}
+                  >
+                    <div className={styles.peekCardInner}>
+                      {/* Image */}
+                      <div className={styles.peekImageWrapper}>
+                        <Image
+                          alt={program.image.alt}
+                          fill
+                          sizes="(max-width: 1200px) 80vw, 500px"
+                          src={program.image.src}
+                          className={styles.peekImage}
+                          priority={index === 0 || index === copy.programs.length - 1}
+                        />
+                        <div className={styles.peekOverlay} style={{ background: colors.gradient }} />
+                        
+                        {/* Pillar badge */}
+                        <span className={styles.peekPillar} style={{ backgroundColor: colors.bg, color: colors.text, borderColor: colors.border }}>
+                          {labels[program.pillar]}
+                        </span>
+                        
+                        {/* Region tag */}
+                        <span className={styles.peekRegion}>
+                          {program.region}
+                        </span>
                       </div>
-                      <h3>{program.title}</h3>
-                      <p>{program.description}</p>
-                      <div className={styles.programMetrics}>
-                        {program.metrics.map((m, i) => (
-                          <div key={i} className={styles.programMetric}>
-                            <strong>{m.value}</strong>
-                            <span>{m.label}</span>
+                      
+                      {/* Content */}
+                      <div className={styles.peekContent}>
+                        <div className={styles.peekHeader}>
+                          <div className={styles.peekIconWrapper} style={{ backgroundColor: colors.bg, borderColor: colors.border, boxShadow: `0 4px 20px ${colors.text}30` }}>
+                            {ProgramIcon}
                           </div>
-                        ))}
+                          {program.link && (
+                            <Link href={program.link.href} className={styles.peekExternalLink} aria-label={program.link.label}>
+                              <ExternalLink size={16} />
+                            </Link>
+                          )}
+                        </div>
+                        
+                        <h3 className={styles.peekTitle}>{program.title}</h3>
+                        <p className={styles.peekDescription}>{program.description}</p>
+                        
+                        {/* Metrics */}
+                        <div className={styles.peekMetrics}>
+                          {program.metrics.slice(0, 2).map((m, i) => (
+                            <div key={i} className={styles.peekMetric}>
+                              <div className={styles.peekMetricValue}>
+                                <Counter 
+                                  end={parseFloat(m.value.replace(/[^\d.]/g, "")) || 0} 
+                                  suffix={m.value.replace(/[\d.]/g, "").replace(m.label, "")} 
+                                  duration={1.5}
+                                  className={styles.peekMetricCounter}
+                                />
+                              </div>
+                              <span className={styles.peekMetricLabel}>{m.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* CTA */}
+                        {program.link && (
+                          <Link href={program.link.href} className={styles.peekCTA}>
+                            <span>{locale === "id" ? "Selengkapnya" : "Learn more"}</span>
+                            <ChevronRight size={14} />
+                          </Link>
+                        )}
                       </div>
-                      {program.link && (
-                        <Link href={program.link.href} className={styles.programLink}>
-                          {program.link.label}
-                          <ChevronRight aria-hidden="true" size={16} />
-                        </Link>
-                      )}
                     </div>
                   </div>
-                </Reveal>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </PinnedStory>
+          
+          {/* Navigation Arrows */}
+          <button 
+            className={`${styles.peekArrow} ${styles.peekArrowPrev}`}
+            onClick={goToPrev}
+            aria-label={locale === "id" ? "Program sebelumnya" : "Previous program"}
+            disabled={isDragging}
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button 
+            className={`${styles.peekArrow} ${styles.peekArrowNext}`}
+            onClick={goToNext}
+            aria-label={locale === "id" ? "Program selanjutnya" : "Next program"}
+            disabled={isDragging}
+          >
+            <ChevronRight size={24} />
+          </button>
+          
+          {/* Dot Indicators */}
+          <div className={styles.peekDots} role="tablist" aria-label={locale === "id" ? "Navigasi program" : "Program navigation"}>
+            {copy.programs.map((_, i) => (
+              <button
+                key={i}
+                className={`${styles.peekDot} ${i === currentIndex ? styles.peekDotActive : ''}`}
+                onClick={() => goToPage(i)}
+                role="tab"
+                aria-selected={i === currentIndex}
+                aria-label={`${locale === "id" ? "Program" : "Program"} ${i + 1} ${locale === "id" ? "dari" : "of"} ${copy.programs.length}`}
+              />
+            ))}
+          </div>
+        </div>
       </section>
 
       <section aria-labelledby="commitment-heading" className={styles.commitment}>

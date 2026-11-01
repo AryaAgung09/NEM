@@ -3126,131 +3126,456 @@
 }
 
 .programs .sectionHeading {
-  margin-bottom: 42px;
+  margin-bottom: 32px;
 }
 
-.pinnedPrograms {
-  height: 80vh;
-  min-height: 600px;
-  max-height: 900px;
+.sectionSubtext {
+  margin-top: 12px;
+  color: #777268;
+  font-size: 0.85rem;
+  font-weight: 400;
+  max-width: 600px;
 }
 
-.programsTrack {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-  width: min(1440px, 100%);
-  margin: 0 auto;
-  height: 100%;
-}
-
-.programCard {
+/* Peek Carousel */
+.peekCarousel {
   position: relative;
+  width: min(1400px, 100%);
+  margin: 0 auto;
+}
+
+.peekTrackContainer {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  padding: 20px 0;
+}
+
+.peekTrack {
+  display: flex;
+  gap: 24px;
+  will-change: transform;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: grab;
+}
+
+.peekTrack:active {
+  cursor: grabbing;
+}
+
+.peekCard {
+  flex: 0 0 380px;
+  opacity: 0.4;
+  transform: scale(0.85);
+  filter: grayscale(0.3);
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+}
+
+.peekCardPeek {
+  opacity: 0.7;
+  transform: scale(0.92);
+  filter: grayscale(0.1);
+  pointer-events: auto;
+}
+
+.peekCardActive {
+  flex: 0 0 520px;
+  opacity: 1;
+  transform: scale(1);
+  filter: grayscale(0);
+  pointer-events: auto;
+  z-index: 10;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 15%);
+}
+
+.peekCardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  background: #f8f7f3;
-  border: 1px solid rgb(33 31 26 / 18%);
+  border-radius: 4px;
   overflow: hidden;
+  background: #171714;
 }
 
-.programImage {
+.peekImageWrapper {
   position: relative;
-  height: 45%;
+  aspect-ratio: 16 / 10;
   overflow: hidden;
   background: #d3d0c6;
 }
 
-.programImage img {
+.peekImage {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  transition: transform 500ms ease;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.6s ease;
+  filter: brightness(0.85) contrast(1.05);
 }
 
-.programCard:hover .programImage img {
-  transform: scale(1.03);
+.peekCard:hover .peekImage {
+  transform: scale(1.05);
+  filter: brightness(1) contrast(1.1);
 }
 
-.programPillar {
+.peekOverlay {
   position: absolute;
+  inset: 0;
+  background: var(--pillar-gradient);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.peekCard:hover .peekOverlay {
+  opacity: 0.2;
+}
+
+.peekPillar {
+  position: absolute;
+  top: 16px;
   left: 16px;
-  bottom: 16px;
   padding: 6px 12px;
   border-radius: 100px;
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  border: 1px solid;
+  backdrop-filter: blur(10px);
+  z-index: 2;
 }
 
-.programContent {
+.peekRegion {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  z-index: 2;
+}
+
+/* Content */
+.peekContent {
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 22px 24px;
+  justify-content: flex-end;
+  padding: clamp(20px, 3vw, 28px);
+  background: linear-gradient(180deg, transparent 30%, rgba(10, 10, 9, 0.95) 100%);
 }
 
-.programMeta {
-  margin-bottom: 10px;
-  color: #777268;
-  font-size: 0.7rem;
-  font-weight: 500;
+.peekHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
 }
 
-.programContent h3 {
+.peekIconWrapper {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid;
+  color: var(--pillar-color);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease;
+  animation: iconPulse 4s ease-in-out infinite;
+}
+
+.peekCardActive:hover .peekIconWrapper {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.peekExternalLink {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.peekExternalLink:hover {
+  background: #fff;
+  color: #171714;
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.peekTitle {
   margin: 0 0 8px;
-  font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+  font-size: clamp(1.25rem, 2.5vw, 1.6rem);
   font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: #fff;
 }
 
-.programContent > p {
-  margin: 0 0 16px;
-  color: #706c61;
-  font-size: 0.8rem;
+.peekDescription {
+  margin: 0 0 20px;
+  color: rgba(245, 243, 237, 0.85);
+  font-size: 0.85rem;
   line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.programMetrics {
+.peekMetrics {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.peekMetric {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-  padding-top: 14px;
-  border-top: 1px solid rgb(33 31 26 / 15%);
+  gap: 4px;
 }
 
-.programMetric {
+.peekMetricValue {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 4px;
 }
 
-.programMetric strong {
-  font-size: 0.9rem;
-  font-weight: 600;
+.peekMetricCounter {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
-.programMetric span {
-  color: #777268;
-  font-size: 0.75rem;
+.peekMetricLabel {
+  color: rgba(245, 243, 237, 0.7);
+  font-size: 0.55rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.programLink {
+/* CTA */
+.peekCTA {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: auto;
-  color: #211f1a;
+  color: #fff;
   font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;
-  transition: color 160ms ease;
+  padding: 10px 16px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  width: fit-content;
 }
 
-.programLink:hover {
-  color: #9a6d27;
+.peekCTA:hover {
+  background: #fff;
+  color: var(--pillar-color);
+  gap: 12px;
+  transform: translateX(4px);
 }
 
-.commitment {
+/* Navigation Arrows */
+.peekArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgb(33 31 26 / 18%);
+  color: #211f1a;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+  transition: all 0.2s ease;
+  z-index: 20;
+}
+
+.peekArrow:hover:not(:disabled) {
+  background: #171714;
+  color: #ffc256;
+  border-color: #ffc256;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 18%);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.peekArrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.peekArrowPrev {
+  left: -28px;
+}
+
+.peekArrowNext {
+  right: -28px;
+}
+
+/* Dot Indicators */
+.peekDots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 32px;
+  padding: 0 16px;
+}
+
+.peekDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgb(33 31 26 / 20%);
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.peekDot:hover {
+  background: rgb(33 31 26 / 40%);
+  transform: scale(1.2);
+}
+
+.peekDotActive {
+  width: 28px;
+  border-radius: 100px;
+  background: #171714;
+}
+
+.peekDotActive:hover {
+  background: #171714;
+  transform: scale(1.1);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .peekCard {
+    flex: 0 0 320px;
+  }
+  
+  .peekCardActive {
+    flex: 0 0 440px;
+  }
+  
+  .peekArrowPrev {
+    left: -16px;
+  }
+  
+  .peekArrowNext {
+    right: -16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .peekCard {
+    flex: 0 0 280px;
+  }
+  
+  .peekCardActive {
+    flex: 0 0 380px;
+  }
+  
+  .peekArrowPrev {
+    left: -8px;
+    width: 48px;
+    height: 48px;
+  }
+  
+  .peekArrowNext {
+    right: -8px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 700px) {
+  .programs {
+    padding: 70px 16px 90px;
+  }
+  
+  .peekTrackContainer {
+    padding: 16px 0;
+  }
+  
+  .peekCard {
+    flex: 0 0 260px;
+  }
+  
+  .peekCardActive {
+    flex: 0 0 320px;
+  }
+  
+  .peekContent {
+    padding: 20px;
+  }
+  
+  .peekTitle {
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+  }
+  
+  .peekDescription {
+    font-size: 0.8rem;
+    -webkit-line-clamp: 2;
+  }
+  
+  .peekMetrics {
+    gap: 14px;
+  }
+  
+  .peekCTA {
+    padding: 8px 14px;
+    font-size: 0.75rem;
+  }
+  
+  .peekArrow {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .peekArrowPrev {
+    left: -4px;
+  }
+  
+  .peekArrowNext {
+    right: -4px;
+  }
+}
+
+/* Icon pulse animation */
+@keyframes iconPulse {
+  0%, 100% { box-shadow: 0 0 20px var(--pillar-color)30; }
+  50% { box-shadow: 0 0 40px var(--pillar-color)50, 0 0 60px var(--pillar-color)20; }
+}.commitment {
   padding: clamp(82px, 9vw, 126px) max(7vw, 28px);
   background: #191916;
   color: #f5f3ed;
@@ -3412,17 +3737,49 @@
     gap: 12px;
   }
 
-  .programsTrack {
+  .programsGrid {
     grid-template-columns: 1fr;
   }
 
-  .pinnedPrograms {
-    height: auto;
-    min-height: 0;
+  .programCard {
+    min-height: auto;
+    flex-direction: column;
   }
 
-  .programCard {
-    min-height: 480px;
+  .programCardFeatured {
+    grid-column: span 1;
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .programCardFeatured .programImageWrapper {
+    width: 100%;
+    min-width: 0;
+    height: 300px;
+  }
+
+  .programCardFeatured .programContent {
+    padding: 24px;
+  }
+
+  .programCardFeatured .programContent h3 {
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    max-width: none;
+  }
+
+  .programCardFeatured .programContent > p {
+    font-size: 0.85rem;
+    max-width: none;
+  }
+
+  .programIconWrapper {
+    width: 52px;
+    height: 52px;
+  }
+
+  .programCardFeatured .programIconWrapper {
+    width: 60px;
+    height: 60px;
   }
 
   .commitmentGrid {
