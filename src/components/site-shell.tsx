@@ -450,20 +450,19 @@ export function SiteShell({ children }: SiteShellProps) {
           </div>
 
           <nav className="site-footer__nav" aria-label="Navigasi situs">
-            {copy.footer.groups.map((group, groupIndex) => (
+            {copy.footer.groups.map((group) => (
               <div className="site-footer__links" key={group.title}>
                 <h2>{group.title}</h2>
-                {group.links.map((label, index) => {
-                  const targetIndexes = groupIndex === 0 ? [0, 1, 4] : [2, 3, 0];
+                {group.links.map((label) => {
+                  let href = "/";
+                  if (label === copy.navigation.about || label === "About Us") href = "/tentang-kami";
+                  else if (label === copy.navigation.business || label === "Our Businesses") href = "/bisnis-kami";
+                  else if (label === copy.navigation.sustainability || label === "Sustainability") href = "/keberlanjutan";
+                  else if (label === copy.navigation.investor || label === "Investor Relations") href = "/hubungan-investor";
+                  else if (label === copy.navigation.media || label === "Media & Information") href = "/media-informasi";
+                  else if (label === "Karir" || label === "Careers") href = "/karir";
                   return (
-                    <Link
-                      href={
-                        groupIndex === 1 && index === 2
-                          ? "/karir"
-                          : navigationTargets[navigationKeys[targetIndexes[index]]]
-                      }
-                      key={label}
-                    >
+                    <Link href={href} key={label}>
                       {label}
                     </Link>
                   );
